@@ -13,20 +13,23 @@
 
 using namespace std;
 
-class TCPClient
-{
-public:
+class TCPClient {
+  public:
     TCPClient();
     ~TCPClient();
 
     bool connectToHost(std::string host, int port);
     void sendData(std::vector<unsigned char> buff);
     std::vector<unsigned char> receivedData();
+    bool checkConnection();
     void closeConnection();
+    bool connectionState();
 
-private:
+  private:
+    static int          MAX_BUFF_SIZE;
     struct sockaddr_in  m_servaddr;
-    int                 m_sockfd;
+    int                 m_sockfd = -1;
+    bool                m_status = false;
 };
 
 #endif // TCPCLIENT_H

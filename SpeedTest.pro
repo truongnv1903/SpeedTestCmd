@@ -1,4 +1,5 @@
-CONFIG += c++11 pthread
+CONFIG += c++11
+LIBS += -lpthread
 
 INCLUDEPATH += \
     src  \
@@ -17,3 +18,6 @@ HEADERS += \
     src/TCP/COBData.h \
     src/TCP/TCPClient.h \
     src/TCP/TCPServer.h
+
+DISTFILES += \
+    style.astylerc

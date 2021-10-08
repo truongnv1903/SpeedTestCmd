@@ -1,0 +1,31 @@
+# ~/config.astylerc
+--quiet                # only display errors
+--errors-to-stdout     # redirect stderr to stdout
+--lineend=linux        # enforce linux lineendings
+--preserve-date        # preserve file modification date
+
+--lineend=linux
+
+--style=google
+
+--indent=spaces=4
+
+--attach-namespaces
+--attach-classes
+--attach-inlines
+
+--add-brackets
+
+--align-pointer=name
+--align-reference=name
+
+--max-code-length=80
+--break-after-logical
+
+--pad-oper
+--unpad-paren
+
+--break-blocks
+--pad-header
+
+

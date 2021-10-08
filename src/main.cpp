@@ -1,14 +1,17 @@
-#include "QueryProccessing.h"
+#include "SpeedChecking.h"
 
-int main(int argc, char *argv[])
-{
-    TCPClient *client = new TCPClient();
-    client->connectToHost("127.0.0.1", 2323);
-//    COBData cobdata(0);
-//    std::vector<unsigned char> data = cobdata.speedData(32.56, 22.23);
-//    client->sendData(data);
-    QueryProccessing *query = new QueryProccessing();
-    client->startReadData();
-    query->startCheck();
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        fprintf(stderr, "usage %s hostname port\n", argv[0]);
+        exit(0);
+    }
+
+    std::string ip = argv[1];
+    int port = atoi(argv[2]);
+
+    SpeedChecking *query = new SpeedChecking();
+    query->setHostParams(ip, port);
+    query->setConnection();
+    query->startCheckThread();
     return 0;
 }
