@@ -13,7 +13,8 @@ class COBData {
         SpeedQuery      = 0x00,
         PingData        = 0x01,
         DownloadData    = 0x02,
-        UploadData      = 0x03
+        UploadData      = 0x03,
+        ResponseState   = 0x04
     };
 
     unsigned char data[128];
@@ -23,4 +24,5 @@ class COBData {
     std::vector<unsigned char> downloadData(double download);
     std::vector<unsigned char> uploadData(double upload);
     std::vector<unsigned char> pingData(bool ping);
+    std::vector<unsigned char> responseState(bool state);
 };

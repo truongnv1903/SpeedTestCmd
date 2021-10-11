@@ -69,3 +69,11 @@ std::vector<unsigned char> COBData::pingData(bool ping) {
     vector<unsigned char> result(data, data + 8);
     return result;
 }
+
+std::vector<unsigned char> COBData::responseState(bool state) {
+    data[5] = static_cast<unsigned char>(COBDataKey::ResponseState);
+    data[6] = static_cast<unsigned char>(state);
+    data[7] = '\r';
+    vector<unsigned char> result(data, data + 8);
+    return result;
+}

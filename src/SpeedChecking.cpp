@@ -69,6 +69,10 @@ void SpeedChecking::doCheck() {
                 bool result = this->checkSpeed(details);
                 printf("Check Speed = %s\r\n", result ? "OK" : "Fail");
 
+                COBData resData;
+                std::vector<unsigned char> resDataSent = resData.responseState(result2);
+                m_client->sendData(resDataSent);
+
                 if (!result) {
                     break;
                 }
