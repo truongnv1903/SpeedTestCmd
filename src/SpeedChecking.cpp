@@ -3,13 +3,19 @@
 std::string SpeedChecking::INTERNET_DNS = "8.8.8.8";
 
 SpeedChecking::SpeedChecking() {
-    m_client = new TCPClient();
+//    m_client = new TCPClient();
+    m_server = new TCPServer();
 }
 
 SpeedChecking::~SpeedChecking() {
-    if (nullptr != m_client) {
-        m_client->closeConnection();
-        delete m_client;
+//    if (nullptr != m_client) {
+//        m_client->closeConnection();
+//        delete m_client;
+//    }
+
+    if (nullptr != m_server) {
+        m_server->closeServer();
+        delete m_server;
     }
 }
 
@@ -19,14 +25,21 @@ void SpeedChecking::doCheck() {
         struct timeval stop, start;
         gettimeofday(&start, nullptr);
 
-        while (m_client->connectionState() == false) {
-            printf("[SpeedChecking] doCheck [FAILED]: connect to server\n");
-            this->setConnection();
+//        while (m_client->connectionState() == false) {
+//            printf("[SpeedChecking] doCheck [FAILED]: connect to server\n");
+//            this->setConnection();
+//            std::this_thread::sleep_for(std::chrono::seconds(2));
+//        }
+
+        while (m_server->checkToClientExist() == false) {
+            printf("[SpeedChecking] doCheck [FAILED]: wait for connect\n");
+//            this->setConnection();
+            m_server->readReady();
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
 
         printf("[SpeedChecking] doCheck..\n");
-        std::vector<unsigned char> tmpData = m_client->receivedData();
+        std::vector<unsigned char> tmpData = m_server->receivedData();
         m_receivedData.insert(m_receivedData.end(), tmpData.begin(), tmpData.end());
 
         while (m_receivedData.size()) {
@@ -56,22 +69,24 @@ void SpeedChecking::doCheck() {
 #else
                 std::string details, details2;
                 bool result2 = this->checkPing(INTERNET_DNS, 1, details2);
-                printf("Internet Connection = %s\r\n", result2 ? "OK" : "Fail");
+                printf("[SpeedChecking] Internet Connection = %s\r\n", result2 ? "OK" : "Fail");
 
                 COBData pingData;
                 std::vector<unsigned char> pingDataSent = pingData.pingData(result2);
-                m_client->sendData(pingDataSent);
+//                m_client->sendData(pingDataSent);
+                m_server->sendData(pingDataSent);
 
                 if (!result2) {
                     break;
                 }
 
                 bool result = this->checkSpeed(details);
-                printf("Check Speed = %s\r\n", result ? "OK" : "Fail");
+                printf("[SpeedChecking] Check Speed = %s\r\n", result ? "OK" : "Fail");
 
                 COBData resData;
                 std::vector<unsigned char> resDataSent = resData.responseState(result2);
-                m_client->sendData(resDataSent);
+//                m_client->sendData(resDataSent);
+                m_server->sendData(resDataSent);
 
                 if (!result) {
                     break;
@@ -85,12 +100,13 @@ void SpeedChecking::doCheck() {
                 down = jdown.value("bytes", 0.0) / (1024.0 * 1024.0);
                 up = jup.value("bytes", 0.0) / (1024.0 * 1024.0);
                 printf("==> Download: %f Mbps|| <== Upload: %f Mbps\r\n", down, up);
-
                 COBData downData, upData;
                 std::vector<unsigned char> downDataSent = downData.downloadData(down);
-                m_client->sendData(downDataSent);
+//                m_client->sendData(downDataSent);
+                m_server->sendData(downDataSent);
                 std::vector<unsigned char> upDataSent = upData.uploadData(up);
-                m_client->sendData(upDataSent);
+//                m_client->sendData(upDataSent);
+                m_server->sendData(upDataSent);
 #endif
             }
         }
@@ -112,39 +128,43 @@ void SpeedChecking::startCheckThread() {
     m_checkThread.join();
 }
 
+void SpeedChecking::startServer(int port) {
+    m_server->openServer(port);
+}
+
 void SpeedChecking::setHostParams(std::string ip, int port) {
     m_ipHost = ip;
     m_portHost = port;
 }
 
 void SpeedChecking::setConnection() {
-    if (nullptr != m_client) {
-        while (m_client->connectionState() == false) {
-            long mtime, seconds, useconds;
-            struct timeval stop, start;
-            gettimeofday(&start, nullptr);
-            printf("[SpeedChecking] connect to host [%s] port [%d]\n", m_ipHost.c_str(),
-                   m_portHost);
+//    if (nullptr != m_client) {
+//        while (m_client->connectionState() == false) {
+//            long mtime, seconds, useconds;
+//            struct timeval stop, start;
+//            gettimeofday(&start, nullptr);
+//            printf("[SpeedChecking] connect to host [%s] port [%d]\n", m_ipHost.c_str(),
+//                   m_portHost);
 
-            std::string details;
+//            std::string details;
 
-            while (this->checkPing(m_ipHost.c_str(), 1, details) == false) {
-                printf("[SpeedChecking] can not ping to host [%s]\n", m_ipHost.c_str());
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-            }
+//            while (this->checkPing(m_ipHost.c_str(), 1, details) == false) {
+//                printf("[SpeedChecking] can not ping to host [%s]\n", m_ipHost.c_str());
+//                std::this_thread::sleep_for(std::chrono::seconds(2));
+//            }
 
-            m_client->connectToHost(m_ipHost, m_portHost);
+//            m_client->connectToHost(m_ipHost, m_portHost);
 
-            gettimeofday(&stop, nullptr);
-            seconds  = stop.tv_sec  - start.tv_sec;
-            useconds = stop.tv_usec - start.tv_usec;
-            mtime = static_cast<long>((seconds) * 1000.0 + useconds / 1000.0);
+//            gettimeofday(&stop, nullptr);
+//            seconds  = stop.tv_sec  - start.tv_sec;
+//            useconds = stop.tv_usec - start.tv_usec;
+//            mtime = static_cast<long>((seconds) * 1000.0 + useconds / 1000.0);
 
-            if (mtime < 1000) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1000 - mtime));
-            }
-        }
-    }
+//            if (mtime < 1000) {
+//                std::this_thread::sleep_for(std::chrono::milliseconds(1000 - mtime));
+//            }
+//        }
+//    }
 }
 
 bool SpeedChecking::checkSpeed(std::string &details) {

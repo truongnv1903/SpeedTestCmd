@@ -10,22 +10,27 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <vector>
 
-class TCPServer
-{
-public:
+class TCPServer {
+  public:
     TCPServer();
     ~TCPServer();
 
     void openServer(int port);
+    void sendData(std::vector<unsigned char> buff);
+    std::vector<unsigned char> receivedData();
     void readReady();
-    void disconnected();
+    bool checkToClientExist();
+    void closeServer();
 
-private:
-    int m_sockfd;
-    int m_connfd;
-    socklen_t m_len;
-    struct sockaddr_in m_servaddr, m_cli;
+  private:
+    static int          MAX_BUFF_SIZE;
+    int                 m_sockfd;
+    int                 m_connfd;
+    socklen_t           m_len;
+    struct sockaddr_in  m_servaddr, m_cli;
+    bool                m_status = false;
 };
 
 #endif // SERVER_H

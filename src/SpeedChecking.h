@@ -7,7 +7,8 @@
 #include <sys/time.h>
 #include "json.hpp"
 #include "COBData.h"
-#include "TCPClient.h"
+//#include "TCPClient.h"
+#include "TCPServer.h"
 
 //#define TEST
 
@@ -21,6 +22,7 @@ class SpeedChecking {
 
     void doCheck();
     void startCheckThread();
+    void startServer(int port);
     void setHostParams(std::string ip, int port);
     void setConnection();
 
@@ -33,7 +35,9 @@ class SpeedChecking {
                     std::string        &output,
                     const std::string  &mode = "r");
 
-    TCPClient                   *m_client = nullptr;
+//    TCPClient                   *m_client = nullptr;
+    TCPServer                   *m_server = nullptr;
+
     static std::string          INTERNET_DNS;
     std::string                 m_ipHost = "";
     int                         m_portHost = -1;

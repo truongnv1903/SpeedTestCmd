@@ -40,7 +40,7 @@ bool TCPClient::connectToHost(std::string host, int port) {
 }
 
 void TCPClient::sendData(std::vector<unsigned char> buff) {
-    printf("\Send %d bytes: ", buff.size());
+    printf("\nSend %d bytes: ", buff.size());
 
     for (int i = 0; i < buff.size(); i++) {
         printf(" %02X", buff.at(i));
