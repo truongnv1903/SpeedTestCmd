@@ -78,9 +78,12 @@ void SpeedChecking::doCheck() {
                 }
 
                 m_detail = json::parse(details);
+                json jdown, jup;
+                jdown = m_detail.value("download", json::object());
+                jup = m_detail.value("upload", json::object());
                 double down, up;
-                down = m_detail.value("download", 0.0) / (1024.0 * 1024.0);
-                up = m_detail.value("upload", 0.0) / (1024.0 * 1024.0);
+                down = jdown.value("bytes", 0.0) / (1024.0 * 1024.0);
+                up = jup.value("bytes", 0.0) / (1024.0 * 1024.0);
                 printf("==> Download: %f Mbps|| <== Upload: %f Mbps\r\n", down, up);
 
                 COBData downData, upData;
@@ -148,7 +151,7 @@ bool SpeedChecking::checkSpeed(std::string &details) {
     // Format a command std::string
     std::string command;
     std::string output;
-    command = "speedtest-cli --json";
+    command = "speedtest -f json";
     int code = commandExec(command, details);
     return (code == 0);
 }
