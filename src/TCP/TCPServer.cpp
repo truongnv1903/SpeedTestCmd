@@ -63,13 +63,11 @@ void TCPServer::sendData(int sock, std::vector<unsigned char> buff) {
     send(sock, buff.data(), sizeof(buff), 0);
 }
 
-std::vector<unsigned char> TCPServer::receivedData(int sock) {
+std::vector<unsigned char> TCPServer::receivedData(int sock, uint16_t &res) {
     printf("[TCPServer] readData.\n");
     char buff[MAX_BUFF_SIZE];
     bzero(buff, sizeof(buff));
-    uint16_t res = read(sock, buff, sizeof(buff));
-//    int sock = *(int *)m_connfd;
-//    uint16_t res = read(sock, buff, sizeof(buff));
+    res = read(sock, buff, sizeof(buff));
 
     std::vector<unsigned char> buffer;
 
