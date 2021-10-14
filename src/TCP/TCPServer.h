@@ -18,19 +18,21 @@ class TCPServer {
     ~TCPServer();
 
     void openServer(int port);
-    void sendData(std::vector<unsigned char> buff);
-    std::vector<unsigned char> receivedData();
-    void readReady();
-    bool checkToClientExist();
+    void sendData(int sock, std::vector<unsigned char> buff);
+    std::vector<unsigned char> receivedData(int sock);
+    bool isConnectionAccepted();
+    void *newSocket();
     void closeServer();
 
   private:
+    static int          MAX_CONNECTIONS;
     static int          MAX_BUFF_SIZE;
     int                 m_sockfd;
-    int                 m_connfd;
+    int                 *m_connfd;
+    int                 m_conn;
+    std::vector<int>    m_clients;
     socklen_t           m_len;
     struct sockaddr_in  m_servaddr, m_cli;
-    bool                m_status = false;
 };
 
 #endif // SERVER_H

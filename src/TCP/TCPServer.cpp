@@ -1,10 +1,13 @@
 #include "TCPServer.h"
 
+int TCPServer::MAX_CONNECTIONS = 5;
 int TCPServer::MAX_BUFF_SIZE = 32;
+
+void *connectionHandler(void *socket_desc);
 
 TCPServer::TCPServer()
     : m_sockfd(-1)
-    , m_connfd(-1) {
+    , m_conn(-1) {
 }
 
 TCPServer::~TCPServer() {
@@ -31,7 +34,7 @@ void TCPServer::openServer(int port) {
     // Binding newly  created socket to given IP and verification
     if (bind(m_sockfd, reinterpret_cast<sockaddr *>(&m_servaddr),
              sizeof(m_servaddr)) != 0) {
-        printf("[TCPServer] Socket bind failed...\n");
+        printf("[TCPServer] Socket bind failed... %d\n", m_sockfd);
         return;
     } else {
         printf("[TCPServer] Socket successfully binded..\n");
@@ -45,32 +48,28 @@ void TCPServer::openServer(int port) {
         printf("[TCPServer] Server listening..\n");
     }
 
-    this->readReady();
+    m_len = sizeof(m_cli);
 }
 
-void TCPServer::sendData(std::vector<unsigned char> buff) {
-    printf("Send %d bytes: ", buff.size());
+void TCPServer::sendData(int sock, std::vector<unsigned char> buff) {
+    printf("Send %d bytes: ", static_cast<int>(buff.size()));
 
-    for (int i = 0; i < buff.size(); i++) {
-        printf(" %02X", buff.at(i));
+    for (int i = 0; i < static_cast<int>(buff.size()); i++) {
+        printf(" %02X", buff.at(static_cast<ulong>(i)));
     }
 
     printf("\n");
-    write(m_connfd, buff.data(), sizeof(buff));
+
+    send(sock, buff.data(), sizeof(buff), 0);
 }
 
-std::vector<unsigned char> TCPServer::receivedData() {
+std::vector<unsigned char> TCPServer::receivedData(int sock) {
     printf("[TCPServer] readData.\n");
     char buff[MAX_BUFF_SIZE];
     bzero(buff, sizeof(buff));
-    uint16_t res = read(m_connfd, buff, sizeof(buff));
-    printf("====> m_connfd: %d || res: %d\n", m_connfd || res);
-
-    if (res > 0) {
-        m_status = true;
-    } else {
-        m_status = false;
-    }
+    uint16_t res = read(sock, buff, sizeof(buff));
+//    int sock = *(int *)m_connfd;
+//    uint16_t res = read(sock, buff, sizeof(buff));
 
     std::vector<unsigned char> buffer;
 
@@ -80,7 +79,7 @@ std::vector<unsigned char> TCPServer::receivedData() {
             buffer.push_back(buff[i]);
         }
 
-        printf("Received %d bytes :", buffer.size());
+        printf("Received %d bytes: ", buffer.size());
 
         for (int i = 0; i < buffer.size(); i++) {
             printf(" %02X", buffer.at(i));
@@ -93,30 +92,33 @@ std::vector<unsigned char> TCPServer::receivedData() {
     return buffer;
 }
 
-void TCPServer::readReady() {
-    m_len = sizeof(m_cli);
+bool TCPServer::isConnectionAccepted() {
     // Accept the data packet from client and verification
-    m_connfd = accept(m_sockfd, reinterpret_cast<sockaddr *>(&m_cli), &m_len);
+//    m_conn = accept(m_sockfd, reinterpret_cast<sockaddr *>(&m_cli), &m_len);
 
-    if (m_connfd < 0) {
-        printf(("[TCPServer] Server accept failed...\n"));
-        return;
+    m_conn = accept(m_sockfd, (struct sockaddr *)&m_cli, (socklen_t *)&m_len);
+
+    m_connfd = static_cast<int *>(malloc(1));
+    *m_connfd = m_conn;
+
+    if (m_conn < 0) {
+        printf("[TCPServer] Server accept failed... %d\n", m_len);
+        return false;
     } else {
-        printf("[TCPServer] Server accepted the client...\n");
+        printf("[TCPServer] Server accept the client... %d\n", m_len);
+        return true;
     }
 }
 
-bool TCPServer::checkToClientExist() {
-//    this->readReady();
-
-    if (m_connfd > 0) {
-        return true;
-    } else {
-        return false;
-    }
+void *TCPServer::newSocket() {
+    return reinterpret_cast<void *>(m_connfd);
 }
 
 void TCPServer::closeServer() {
     close(m_sockfd);
+    close(m_conn);
+//    free(m_connfd);
 }
+
+
 
