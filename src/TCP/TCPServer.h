@@ -19,7 +19,7 @@ class TCPServer {
 
     void openServer(int port);
     void sendData(int sock, std::vector<unsigned char> buff);
-    std::vector<unsigned char> receivedData(int sock, uint16_t &res);
+    std::vector<unsigned char> receivedData(int sock, int &res);
     bool isConnectionAccepted();
     void *newSocket();
     void closeServer();

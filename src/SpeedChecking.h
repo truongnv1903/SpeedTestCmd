@@ -20,10 +20,9 @@ class SpeedChecking {
     SpeedChecking();
     ~SpeedChecking();
 
-    void doCheck();
     void startCheckThread();
     void startServer(int port);
-    static void *wrapperConnectionHandler(void *socket_desc);
+    static void *wrapperConnectionHandler(void *pointer);
 
   private:
     bool checkSpeed(std::string &details);
@@ -33,7 +32,7 @@ class SpeedChecking {
     int commandExec(const std::string  &command,
                     std::string        &output,
                     const std::string  &mode = "r");
-    void *connectionHandler(void *socket_desc);
+    void *connectionHandler();
 
     TCPServer *m_server = nullptr;
     static std::string          INTERNET_DNS;
@@ -41,7 +40,6 @@ class SpeedChecking {
     int                         m_portHost = -1;
     std::vector<unsigned char>  m_receivedData;
     bool                        m_start = false;
-    std::thread                 m_checkThread;
     json                        m_detail;
 };
 

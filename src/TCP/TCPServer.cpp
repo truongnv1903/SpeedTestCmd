@@ -63,7 +63,7 @@ void TCPServer::sendData(int sock, std::vector<unsigned char> buff) {
     send(sock, buff.data(), sizeof(buff), 0);
 }
 
-std::vector<unsigned char> TCPServer::receivedData(int sock, uint16_t &res) {
+std::vector<unsigned char> TCPServer::receivedData(int sock, int &res) {
     printf("[TCPServer] readData.\n");
     char buff[MAX_BUFF_SIZE];
     bzero(buff, sizeof(buff));
@@ -100,10 +100,10 @@ bool TCPServer::isConnectionAccepted() {
     *m_connfd = m_conn;
 
     if (m_conn < 0) {
-        printf("[TCPServer] Server accept failed... %d\n", m_len);
+        printf("[TCPServer] Server accept failed...\n");
         return false;
     } else {
-        printf("[TCPServer] Server accept the client... %d\n", m_len);
+        printf("[TCPServer] Server accept the client...\n");
         return true;
     }
 }
@@ -115,7 +115,7 @@ void *TCPServer::newSocket() {
 void TCPServer::closeServer() {
     close(m_sockfd);
     close(m_conn);
-//    free(m_connfd);
+    free(m_connfd);
 }
 
 
